@@ -1,0 +1,23 @@
+# Python 3.12 was used. Versions are not pinned, except where the code needs it.
+
+# 02_Processing_Scripts
+numpy
+pandas
+scipy
+xarray
+netCDF4
+rasterio
+rioxarray
+geopandas
+shapely
+pyproj
+
+# 02_Dataframes_Processing_Scripts (tqdm is optional: progress bar)
+tqdm
+
+# 04_Machine_Learning
+scikit-learn
+matplotlib
+pyyaml
+lightgbm>=4.0
+shap

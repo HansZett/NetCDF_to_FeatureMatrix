@@ -1,0 +1,182 @@
+match_type;key;display_label;var_group;unit;note
+# match_type: base = store column; also applies to lag/rolling children. exact = exactly this column. prefix = any column whose name starts with key.
+# unit: from the dataset documentation (see the READMEs in 02_Processing_Scripts); [ERA5]=added from the ERA5-Land documentation.
+# --- Target variable (excluded from the metadata tables; label kept for plots) ---
+exact;GWL;Groundwater Level;Target;m;monthly mean groundwater level (target)
+# --- ERA5-Land dynamic: Temperature ---
+base;era5l__d2m;2m Dewpoint Temperature;ERA5-Land;K;2m dewpoint temp
+base;era5l__t2m;2m Temperature;ERA5-Land;K;2m temperature
+base;era5l__skt;Skin Temperature;ERA5-Land;K;skin temperature
+base;era5l__stl1;Soil Temperature 0-7 cm;ERA5-Land;K;soil temp layer 1
+base;era5l__stl2;Soil Temperature 7-28 cm;ERA5-Land;K;soil temp layer 2
+base;era5l__stl3;Soil Temperature 28-100 cm;ERA5-Land;K;soil temp layer 3
+base;era5l__stl4;Soil Temperature 100-289 cm;ERA5-Land;K;soil temp layer 4
+base;era5l__tsn;Snow Layer Temperature;ERA5-Land;K;[ERA5] temperature of snow layer
+# --- ERA5-Land dynamic: Moisture / Water balance ---
+base;era5l__src;Skin Reservoir Content;ERA5-Land;m w.e.;skin reservoir content
+base;era5l__swvl1;Soil Water Content 0-7 cm;ERA5-Land;m3/m3;vol soil water 1
+base;era5l__swvl2;Soil Water Content 7-28 cm;ERA5-Land;m3/m3;vol soil water 2
+base;era5l__swvl3;Soil Water Content 28-100 cm;ERA5-Land;m3/m3;vol soil water 3
+base;era5l__swvl4;Soil Water Content 100-289 cm;ERA5-Land;m3/m3;vol soil water 4
+base;era5l__tp;Precipitation;ERA5-Land;m/day;total precipitation
+base;era5l__e;Evaporation (total);ERA5-Land;m w.e./day;total evaporation
+base;era5l__pev;Potential Evaporation;ERA5-Land;m/day;potential evaporation
+base;era5l__evabs;Bare Soil Evaporation;ERA5-Land;m w.e./day;evap bare soil
+base;era5l__evaow;Open Water Evaporation;ERA5-Land;m w.e./day;evap open water
+base;era5l__evatc;Canopy Evapotranspiration;ERA5-Land;m w.e./day;evap canopy top
+base;era5l__evavt;Vegetation Transpiration;ERA5-Land;m w.e./day;vegetation transpiration
+base;era5l__es;Snow Evaporation;ERA5-Land;m w.e./day;snow evaporation
+base;era5l__ro;Runoff (total);ERA5-Land;m/day;total runoff
+base;era5l__sro;Surface Runoff;ERA5-Land;m/day;surface runoff
+base;era5l__ssro;Sub-surface Runoff;ERA5-Land;m/day;sub-surface runoff
+# --- ERA5-Land dynamic: Snow (not covered by XLSX -> ERA5 docs) ---
+base;era5l__sf;Snowfall;ERA5-Land;m w.e./day;[ERA5] snowfall
+base;era5l__smlt;Snowmelt;ERA5-Land;m w.e./day;[ERA5] snowmelt
+base;era5l__sd;Snow Water Equivalent;ERA5-Land;m w.e.;[ERA5] snow depth water equiv.
+base;era5l__sde;Snow Depth;ERA5-Land;m;[ERA5] snow depth (geometric)
+base;era5l__rsn;Snow Density;ERA5-Land;kg/m3;[ERA5] snow density
+base;era5l__snowc;Snow Cover;ERA5-Land;%;[ERA5] snow cover
+base;era5l__asn;Snow Albedo;ERA5-Land;-;[ERA5] snow albedo (0-1)
+# --- ERA5-Land dynamic: Radiation / Fluxes / Wind / Veg ---
+base;era5l__fal;Forecast Albedo;ERA5-Land;-;forecast albedo
+base;era5l__slhf;Latent Heat Flux;ERA5-Land;J/m2/day;surface latent heat flux
+base;era5l__sshf;Sensible Heat Flux;ERA5-Land;J/m2/day;surface sensible heat flux
+base;era5l__ssr;Net Solar Radiation;ERA5-Land;J/m2/day;surface net solar radiation
+base;era5l__str;Net Thermal Radiation;ERA5-Land;J/m2/day;surface net thermal radiation
+base;era5l__ssrd;Downward Solar Radiation;ERA5-Land;J/m2/day;surface solar radiation downwards
+base;era5l__strd;Downward Thermal Radiation;ERA5-Land;J/m2/day;surface thermal radiation downwards
+base;era5l__u10;10m Wind U-Component;ERA5-Land;m/s;10m u-wind
+base;era5l__v10;10m Wind V-Component;ERA5-Land;m/s;10m v-wind
+base;era5l__sp;Surface Pressure;ERA5-Land;Pa;surface pressure
+base;era5l__lai_hv;Leaf Area Index (High Veg.);ERA5-Land;m2/m2;LAI high veg
+base;era5l__lai_lv;Leaf Area Index (Low Veg.);ERA5-Land;m2/m2;LAI low veg
+# --- TerraClimate (reference climate) ---
+base;terra__temp_max;Max. Temperature;TerraClimate;degC;maximum temperature
+base;terra__temp_min;Min. Temperature;TerraClimate;degC;minimum temperature
+base;terra__precipitation;Precipitation;TerraClimate;mm/month;precipitation
+base;terra__ET_actual;Actual Evapotranspiration;TerraClimate;mm/month;actual ET
+base;terra__ET_potential;Potential Evapotranspiration;TerraClimate;mm/month;potential ET
+base;terra__runoff;Runoff;TerraClimate;mm/month;runoff surface+subsurface
+base;terra__soil_moisture;Soil Moisture;TerraClimate;mm;soil moisture
+base;terra__snow_water;Snow Water Equivalent;TerraClimate;mm;snow water equivalent
+base;terra__water_deficit;Climate Water Deficit;TerraClimate;mm/month;climate water deficit
+base;terra__solar_radiation;Solar Radiation;TerraClimate;W/m2;solar radiation
+base;terra__vapor_pressure;Vapor Pressure;TerraClimate;kPa;vapor pressure
+base;terra__vapor_pressure_deficit;Vapor Pressure Deficit;TerraClimate;kPa;vapor pressure deficit
+base;terra__wind_speed;Wind Speed;TerraClimate;m/s;wind speed
+base;terra__drought_index_pdsi;Drought Index (PDSI);TerraClimate;-;Palmer drought severity index
+# --- GRACE / TWSA ---
+base;twsa__TWS;Terrestrial Water Storage (GRACE);TWSA;mm;TWS anomaly (GRACE gap-filled reconstruction, mm equivalent water height)
+base;twsa__TWS_variance;TWS Variance (GRACE);TWSA;mm2;variance (sigma^2) of the TWS anomaly
+# --- LCC (engineered, prefix C3S__) ---
+exact;C3S__LCC;Land Cover;LCC;class;current class (categorical)
+exact;C3S__LCC_previous;Land Cover (Previous Year);LCC;class;previous-year class (categorical)
+exact;C3S__LCC_changed;Land Cover Changed;LCC;0/1;1 = change vs. previous year
+exact;C3S__LCC_stable;Land Cover Stable;LCC;0/1;1 = only one class in record
+exact;C3S__months_since_LCC_change;Months Since LCC Change;LCC;months;sentinel -1 = never
+# --- Basin-ERA5-Land aggregates (dynamic); area-weighted basin mean daily rate ---
+base;basin_era5l_lev06__tp;Basin Precipitation (ERA5-L, lev06);Basin;mm/day;area-weighted basin mean daily rate
+base;basin_era5l_lev06__ro;Basin Runoff (ERA5-L, lev06);Basin;mm/day;area-weighted basin mean daily rate
+base;basin_era5l_lev06__sro;Basin Surface Runoff (ERA5-L, lev06);Basin;mm/day;area-weighted basin mean daily rate
+base;basin_era5l_lev06__ssro;Basin Sub-surface Runoff (ERA5-L, lev06);Basin;mm/day;area-weighted basin mean daily rate
+base;basin_era5l_lev07__tp;Basin Precipitation (ERA5-L, lev07);Basin;mm/day;area-weighted basin mean daily rate
+base;basin_era5l_lev07__ro;Basin Runoff (ERA5-L, lev07);Basin;mm/day;area-weighted basin mean daily rate
+base;basin_era5l_lev07__sro;Basin Surface Runoff (ERA5-L, lev07);Basin;mm/day;area-weighted basin mean daily rate
+base;basin_era5l_lev07__ssro;Basin Sub-surface Runoff (ERA5-L, lev07);Basin;mm/day;area-weighted basin mean daily rate
+# --- Basin-TerraClimate aggregates (dynamic); area-weighted basin mean, native units ---
+base;basin_terra_lev06__precipitation;Basin Precipitation (Terra, lev06);Basin;mm/month;area-weighted basin mean
+base;basin_terra_lev06__runoff;Basin Runoff (Terra, lev06);Basin;mm/month;area-weighted basin mean
+base;basin_terra_lev06__ET_actual;Basin Actual ET (Terra, lev06);Basin;mm/month;area-weighted basin mean
+base;basin_terra_lev06__ET_potential;Basin Potential ET (Terra, lev06);Basin;mm/month;area-weighted basin mean
+base;basin_terra_lev06__water_deficit;Basin Climate Water Deficit (Terra, lev06);Basin;mm/month;area-weighted basin mean
+base;basin_terra_lev06__soil_moisture;Basin Soil Moisture (Terra, lev06);Basin;mm;end-of-month state
+base;basin_terra_lev06__snow_water;Basin Snow Water Equiv. (Terra, lev06);Basin;mm;end-of-month state
+base;basin_terra_lev06__solar_radiation;Basin Solar Radiation (Terra, lev06);Basin;W/m2;monthly mean
+base;basin_terra_lev06__temp_max;Basin Max Temperature (Terra, lev06);Basin;degC;monthly mean
+base;basin_terra_lev06__temp_min;Basin Min Temperature (Terra, lev06);Basin;degC;monthly mean
+base;basin_terra_lev06__vapor_pressure;Basin Vapor Pressure (Terra, lev06);Basin;kPa;monthly mean
+base;basin_terra_lev06__vapor_pressure_deficit;Basin Vapor Pressure Deficit (Terra, lev06);Basin;kPa;monthly mean
+base;basin_terra_lev06__drought_index_pdsi;Basin Drought Index PDSI (Terra, lev06);Basin;-;end-of-month state
+base;basin_terra_lev06__wind_speed;Basin Wind Speed (Terra, lev06);Basin;m/s;monthly mean
+base;basin_terra_lev07__precipitation;Basin Precipitation (Terra, lev07);Basin;mm/month;area-weighted basin mean
+base;basin_terra_lev07__runoff;Basin Runoff (Terra, lev07);Basin;mm/month;area-weighted basin mean
+base;basin_terra_lev07__ET_actual;Basin Actual ET (Terra, lev07);Basin;mm/month;area-weighted basin mean
+base;basin_terra_lev07__ET_potential;Basin Potential ET (Terra, lev07);Basin;mm/month;area-weighted basin mean
+base;basin_terra_lev07__water_deficit;Basin Climate Water Deficit (Terra, lev07);Basin;mm/month;area-weighted basin mean
+base;basin_terra_lev07__soil_moisture;Basin Soil Moisture (Terra, lev07);Basin;mm;end-of-month state
+base;basin_terra_lev07__snow_water;Basin Snow Water Equiv. (Terra, lev07);Basin;mm;end-of-month state
+base;basin_terra_lev07__solar_radiation;Basin Solar Radiation (Terra, lev07);Basin;W/m2;monthly mean
+base;basin_terra_lev07__temp_max;Basin Max Temperature (Terra, lev07);Basin;degC;monthly mean
+base;basin_terra_lev07__temp_min;Basin Min Temperature (Terra, lev07);Basin;degC;monthly mean
+base;basin_terra_lev07__vapor_pressure;Basin Vapor Pressure (Terra, lev07);Basin;kPa;monthly mean
+base;basin_terra_lev07__vapor_pressure_deficit;Basin Vapor Pressure Deficit (Terra, lev07);Basin;kPa;monthly mean
+base;basin_terra_lev07__drought_index_pdsi;Basin Drought Index PDSI (Terra, lev07);Basin;-;end-of-month state
+base;basin_terra_lev07__wind_speed;Basin Wind Speed (Terra, lev07);Basin;m/s;monthly mean
+# --- Basin-static: shared identity/geometry (HYBAS_ID is identifier, not a feature) ---
+exact;basin_lev06__HYBAS_ID;Basin ID (lev06);Basin;ID;identifier, excluded in experiments
+exact;basin_lev07__HYBAS_ID;Basin ID (lev07);Basin;ID;identifier, excluded in experiments
+exact;basin_lev06__UP_AREA;Catchment Area (lev06);Basin;km2;
+exact;basin_lev07__UP_AREA;Catchment Area (lev07);Basin;km2;
+exact;basin_lev06__COAST;Coastal Basin (lev06);Basin;0/1;categorical
+exact;basin_lev07__COAST;Coastal Basin (lev07);Basin;0/1;categorical
+# --- Basin-static: per-product coverage/area diagnostics (grid-dependent) ---
+exact;basin_era5l_lev06__coverage_frac;ERA5-L Coverage Fraction (lev06);Basin;-;0-1, NOT a size proxy
+exact;basin_era5l_lev07__coverage_frac;ERA5-L Coverage Fraction (lev07);Basin;-;0-1, NOT a size proxy
+exact;basin_era5l_lev06__basin_area_m2;Basin Area on ERA5-L grid (lev06);Basin;m2;
+exact;basin_era5l_lev07__basin_area_m2;Basin Area on ERA5-L grid (lev07);Basin;m2;
+exact;basin_era5l_lev06__covered_area_m2;ERA5-L Covered Area (lev06);Basin;m2;
+exact;basin_era5l_lev07__covered_area_m2;ERA5-L Covered Area (lev07);Basin;m2;
+exact;basin_terra_lev06__coverage_frac;Terra Coverage Fraction (lev06);Basin;-;0-1, NOT a size proxy
+exact;basin_terra_lev07__coverage_frac;Terra Coverage Fraction (lev07);Basin;-;0-1, NOT a size proxy
+exact;basin_terra_lev06__basin_area_m2;Basin Area on Terra grid (lev06);Basin;m2;
+exact;basin_terra_lev07__basin_area_m2;Basin Area on Terra grid (lev07);Basin;m2;
+exact;basin_terra_lev06__covered_area_m2;Terra Covered Area (lev06);Basin;m2;
+exact;basin_terra_lev07__covered_area_m2;Terra Covered Area (lev07);Basin;m2;
+# --- ERA5-Land static (not covered by XLSX -> ERA5 docs) ---
+base;era5l_static__slt;Soil Type (ERA5);ERA5-static;class;[ERA5] soil type (categorical)
+base;era5l_static__tvl;Low Vegetation Type;ERA5-static;class;[ERA5] low veg type (categorical)
+base;era5l_static__tvh;High Vegetation Type;ERA5-static;class;[ERA5] ~99% NaN -> usually dropped
+base;era5l_static__cvl;Low Vegetation Cover;ERA5-static;-;[ERA5] low veg cover 0-1
+base;era5l_static__cvh;High Vegetation Cover;ERA5-static;-;[ERA5] high veg cover 0-1
+base;era5l_static__lsm;Land-Sea Mask;ERA5-static;-;[ERA5] land-sea mask 0-1
+base;era5l_static__cl;Lake Cover;ERA5-static;-;[ERA5] lake cover 0-1
+base;era5l_static__dl;Lake Depth;ERA5-static;m;[ERA5] lake depth
+base;era5l_static__glm;Glacier Mask;ERA5-static;0/1;[ERA5] glacier mask
+# --- SoilGrids v2.0 ---
+base;soilgrids__clay;Clay Fraction;SoilGrids;% wt;clay mass fraction
+base;soilgrids__sand;Sand Fraction;SoilGrids;% wt;sand mass fraction
+base;soilgrids__silt;Silt Fraction;SoilGrids;% wt;silt mass fraction
+base;soilgrids__soc;Soil Organic Carbon;SoilGrids;g/kg;soil organic carbon
+base;soilgrids__bulk_density;Bulk Density;SoilGrids;g/cm3;bulk density fine earth
+base;soilgrids__coarse_fragments;Coarse Fragments;SoilGrids;% vol;coarse fragments volumetric
+base;soilgrids__vwc_10kPa;Water Content at 10 kPa;SoilGrids;m3/m3;VWC at 10 kPa
+base;soilgrids__vwc_33kPa;Field Capacity (33 kPa);SoilGrids;m3/m3;field capacity
+base;soilgrids__vwc_1500kPa;Wilting Point (1500 kPa);SoilGrids;m3/m3;wilting point
+# --- GASY (specific yield, 7 depth layers) ---
+prefix;gasy__sy_;Specific Yield;GASY;- (0-0.5);specific yield per depth
+# --- GLiM / GLHYMPS 2.0 ---
+base;glim__porosity;Porosity;GLiM;- (0-1);effective porosity
+base;glim__permeability_no_permafrost;Permeability;GLiM;log10(m2);
+base;glim__permeability_permafrost;Permeability (Permafrost);GLiM;log10(m2);systematically NaN in DE
+base;glim__permeability_std;Permeability (Std. Dev.);GLiM;log10(m2);
+base;glim__litho_class;Lithology Class;GLiM;integer code;categorical, 15 GLiM classes (1-15), 255 = no data
+# --- WHYMAP ---
+base;whymap__hygeo2;Hydrogeology Class;WHYMAP;class;categorical
+# --- HydroSHEDS Terrain ---
+base;hydsheds_terrain__dem;Elevation;Terrain;m;void-filled DEM (SRTM)
+base;hydsheds_terrain__slope;Slope;Terrain;deg;terrain slope angle
+base;hydsheds_terrain__aspect;Aspect;Terrain;deg;aspect, 0=N clockwise
+base;hydsheds_terrain__twi;Topographic Wetness Index;Terrain;-;ln(a/tan b)
+base;hydsheds_terrain__hand;Height Above Nearest Drainage;Terrain;m;height above nearest drainage
+base;hydsheds_terrain__acc;Flow Accumulation;Terrain;count;upstream cell count
+base;hydsheds_terrain__dir;Flow Direction;Terrain;D8 code;categorical -> usually dropped
+# --- HydroRIVERS distance classes ---
+prefix;hydrivers_dist__distance_class_;Distance to River (Class);Rivers;deg;Euclidean distance to the nearest river of ORD_FLOW class N (suffix)
+# --- Borehole / Well metadata (static, Germany_Raw metadata block) ---
+exact;Elevation;Surface Elevation;Well-Meta;m;m a.s.l.
+exact;Depth;Borehole Depth;Well-Meta;m;m b.g.l.
+exact;UpFilter;Filter Top;Well-Meta;m;m b.g.l.
+exact;LoFilter;Filter Bottom;Well-Meta;m;m b.g.l.
+exact;ScrLength;Filter Length;Well-Meta;m;LoFilter - UpFilter
+exact;AquiferMed;Aquifer Medium;Well-Meta;cat.;Fractured/Porous/Karstic/Unknown
+exact;PreState;Pressure State;Well-Meta;cat.;Confined/Unconfined/Unknown

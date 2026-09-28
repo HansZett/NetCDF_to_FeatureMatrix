@@ -1,0 +1,401 @@
+# =====================================================================
+# Experiment configuration (single source of truth)
+#
+# Resolution per experiment:
+#   resolved = ( resolved(base_experiment)
+#                u  expand(include_groups)  u  include_features )
+#              \  ( expand(exclude_groups)  u  exclude_features )
+#
+#   target: {kind: zscore|gwa_cm, reference_start, reference_end, gwl_to_cm, min_ref_months}
+#           zscore  = per-well StandardScaler on the pre-test period (temporal standard)
+#           gwa_cm  = centred anomaly in cm (transferable, for spatial / raster)
+#   split:  {kind: temporal|spatial, fold_dim, n_folds, val_fold_offset}
+#           temporal = date split (train < stop_start, early-stop, test >= test_start)
+#           spatial  = K-fold over <fold_dim>__HYBAS_ID (make_folds.py)
+#   Default = zscore + temporal.
+#   Resolved/validated by resolve_experiments.py (incl. leakage check:
+#   for a spatial split, <fold_dim>__HYBAS_ID must not be a feature).
+#
+# ---------------------------------------------------------------------
+# STRUCTURE (rebuilt around the basin-scale TerraClimate integration)
+#
+#   Two parallel climate ladders, each mirrored temporal + spatial:
+#
+#     ERA5  ladder : ERA5-Land point climate is the dynamic driver
+#     Terra ladder : TerraClimate point climate is the dynamic driver
+#                    (swaps the era5l group for terra; all static base
+#                     layers incl. era5l_static stay the same)
+#
+#   Each ladder adds one group per rung:
+#     0 base -> 1 +GLiM -> 2 +WHYMAP -> 3 +LCC -> 4 +TWSA -> 5 +RiverDist
+#   The final rung is the ONLY place we do not add but SWITCH sets: the
+#   basin-scale drivers are tried at lev06 OR lev07 (two sibling leaves),
+#   using each ladder's own product (basin_era5l_* for ERA5, basin_terra_*
+#   for Terra). HYBAS_ID and the m2 size proxies are dropped; UP_AREA,
+#   COAST and coverage_frac stay.
+#
+#   GEMS is the published national benchmark (separate store profile),
+#   kept temporal + spatial as the reference point.
+#
+#   Naming: <driver>_<rung>_<step>[_<level>][_spatial]
+#           e.g. ERA5_4_twsa, Terra_6_basin_lev07, ERA5_0_base_spatial
+#   Output folders: results_<lowercased experiment name>.
+# =====================================================================
+
+global_settings:
+  time_start: "1991-01"
+  time_end: "2020-12"          # uniform hull, bounded by TWSA
+  require_twsa_valid: true     # exclude wells without TWSA coverage
+  stop_start: "2008-01"        # start of the early-stopping window (temporal)
+  test_start: "2013-01"        # start of the test period (temporal)
+  results_root: ""             # empty -> results_*/ sit directly under --results-root
+                               # (on the HPC: 05_Machine_Learning_Results/02_monthly/)
+
+  # Defaults for the target/split blocks (overridable per experiment):
+  target:
+    kind: zscore
+    reference_start: "2004-01-01"   # GRACE mascon baseline (only relevant for gwa_cm)
+    reference_end:   "2009-12-31"
+    gwl_to_cm:       100.0          # GWL is in metres
+    min_ref_months:  12
+  split:
+    kind: temporal
+    fold_dim: basin_lev06           # only relevant for spatial; all spatial CV folds on lev06
+    n_folds: 5
+    val_fold_offset: 1
+
+experiments:
+
+  # =====================================================================
+  # NATIONAL BENCHMARK (published GEMS-GER predictors)
+  # =====================================================================
+  GEMS:
+    description: "Replication of the published GEMS-GER dataset (national benchmark)."
+    store_profile: gems
+    output_subdir: results_gems
+    display_name: "GEMS-GER"
+    color: "#43A047"
+    include_groups: [climate, hydrogeology, hydrology, lithology, landuse, geomorphology, static]
+
+  # =====================================================================
+  # ERA5-Land LADDER (TEMPORAL) -- zscore GWL, date split
+  # =====================================================================
+  ERA5_0_base:
+    description: "ERA5-Land point climate + base static (ERA5-static, SoilGrids, GASY, Terrain)."
+    store_profile: global
+    output_subdir: results_era5_0_base
+    display_name: "ERA5 Base"
+    color: "#90CAF9"
+    include_groups: [era5l, era5l_static, soilgrids, gasy, hydsheds_terrain]
+    exclude_features:
+      - hydsheds_terrain__dir              # D8 code, no ordinal meaning
+
+  ERA5_1_glim:
+    description: "ERA5 base + coarse lithology/hydrogeology (GLiM)."
+    base_experiment: ERA5_0_base
+    output_subdir: results_era5_1_glim
+    display_name: "ERA5 +GLiM"
+    color: "#64B5F6"
+    include_groups: [glim]
+    exclude_features:
+      - glim__permeability_permafrost      # no wells on permafrost
+
+  ERA5_2_whymap:
+    description: "ERA5 +GLiM + detailed hydrogeology (WHYMAP)."
+    base_experiment: ERA5_1_glim
+    output_subdir: results_era5_2_whymap
+    display_name: "ERA5 +WHYMAP"
+    color: "#42A5F5"
+    include_groups: [whymap]
+
+  ERA5_3_lcc:
+    description: "ERA5 +WHYMAP + land cover (LCC, engineered, prefix C3S__)."
+    base_experiment: ERA5_2_whymap
+    output_subdir: results_era5_3_lcc
+    display_name: "ERA5 +LCC"
+    color: "#2196F3"
+    include_groups: [lcc]
+
+  ERA5_4_twsa:
+    description: "ERA5 +LCC + GRACE/TWSA (sets the time hull)."
+    base_experiment: ERA5_3_lcc
+    output_subdir: results_era5_4_twsa
+    display_name: "ERA5 +TWSA"
+    color: "#1E88E5"
+    include_groups: [twsa]
+
+  ERA5_5_riverdist:
+    description: "ERA5 +TWSA + distance to rivers (HydroRIVERS)."
+    base_experiment: ERA5_4_twsa
+    output_subdir: results_era5_5_riverdist
+    display_name: "ERA5 +RiverDist"
+    color: "#1976D2"
+    include_groups: [hydrivers_dist]
+
+  ERA5_6_basin_lev06:
+    description: "ERA5 +RiverDist + ERA5-Land basin aggregates at HydroBASINS lev06."
+    base_experiment: ERA5_5_riverdist
+    output_subdir: results_era5_6_basin_lev06
+    display_name: "ERA5 +Basin06"
+    color: "#1565C0"
+    include_groups: [basin_lev06, basin_era5l_lev06]
+    exclude_features:                       # IDs + size proxies out; UP_AREA/COAST/coverage_frac stay
+      - basin_lev06__HYBAS_ID
+      - basin_era5l_lev06__basin_area_m2
+      - basin_era5l_lev06__covered_area_m2
+
+  ERA5_6_basin_lev07:
+    description: "ERA5 +RiverDist + ERA5-Land basin aggregates at HydroBASINS lev07."
+    base_experiment: ERA5_5_riverdist
+    output_subdir: results_era5_6_basin_lev07
+    display_name: "ERA5 +Basin07"
+    color: "#0D47A1"
+    include_groups: [basin_lev07, basin_era5l_lev07]
+    exclude_features:
+      - basin_lev07__HYBAS_ID
+      - basin_era5l_lev07__basin_area_m2
+      - basin_era5l_lev07__covered_area_m2
+
+  # =====================================================================
+  # TerraClimate LADDER (TEMPORAL) -- same rungs, terra swapped in for era5l
+  # =====================================================================
+  Terra_0_base:
+    description: "TerraClimate point climate + base static (swaps era5l for terra; static base unchanged)."
+    base_experiment: ERA5_0_base
+    output_subdir: results_terra_0_base
+    display_name: "Terra Base"
+    color: "#CE93D8"
+    exclude_groups: [era5l]
+    include_groups: [terra]
+
+  Terra_1_glim:
+    description: "Terra base + coarse lithology/hydrogeology (GLiM)."
+    base_experiment: Terra_0_base
+    output_subdir: results_terra_1_glim
+    display_name: "Terra +GLiM"
+    color: "#BA68C8"
+    include_groups: [glim]
+    exclude_features:
+      - glim__permeability_permafrost
+
+  Terra_2_whymap:
+    description: "Terra +GLiM + detailed hydrogeology (WHYMAP)."
+    base_experiment: Terra_1_glim
+    output_subdir: results_terra_2_whymap
+    display_name: "Terra +WHYMAP"
+    color: "#AB47BC"
+    include_groups: [whymap]
+
+  Terra_3_lcc:
+    description: "Terra +WHYMAP + land cover (LCC, engineered, prefix C3S__)."
+    base_experiment: Terra_2_whymap
+    output_subdir: results_terra_3_lcc
+    display_name: "Terra +LCC"
+    color: "#9C27B0"
+    include_groups: [lcc]
+
+  Terra_4_twsa:
+    description: "Terra +LCC + GRACE/TWSA (sets the time hull)."
+    base_experiment: Terra_3_lcc
+    output_subdir: results_terra_4_twsa
+    display_name: "Terra +TWSA"
+    color: "#8E24AA"
+    include_groups: [twsa]
+
+  Terra_5_riverdist:
+    description: "Terra +TWSA + distance to rivers (HydroRIVERS)."
+    base_experiment: Terra_4_twsa
+    output_subdir: results_terra_5_riverdist
+    display_name: "Terra +RiverDist"
+    color: "#7B1FA2"
+    include_groups: [hydrivers_dist]
+
+  Terra_6_basin_lev06:
+    description: "Terra +RiverDist + TerraClimate basin aggregates at HydroBASINS lev06."
+    base_experiment: Terra_5_riverdist
+    output_subdir: results_terra_6_basin_lev06
+    display_name: "Terra +Basin06"
+    color: "#6A1B9A"
+    include_groups: [basin_lev06, basin_terra_lev06]
+    exclude_features:
+      - basin_lev06__HYBAS_ID
+      - basin_terra_lev06__basin_area_m2
+      - basin_terra_lev06__covered_area_m2
+
+  Terra_6_basin_lev07:
+    description: "Terra +RiverDist + TerraClimate basin aggregates at HydroBASINS lev07."
+    base_experiment: Terra_5_riverdist
+    output_subdir: results_terra_6_basin_lev07
+    display_name: "Terra +Basin07"
+    color: "#4A148C"
+    include_groups: [basin_lev07, basin_terra_lev07]
+    exclude_features:
+      - basin_lev07__HYBAS_ID
+      - basin_terra_lev07__basin_area_m2
+      - basin_terra_lev07__covered_area_m2
+
+  # =====================================================================
+  # SPATIAL twins (GWA in cm, K-fold over basin_lev06).
+  # Each inherits its temporal twin and only flips target + split, so
+  # features / hull / params are identical to the temporal rung.
+  # NB: <fold_dim>__HYBAS_ID must not be a feature (resolve checks this);
+  # the basin rungs already drop HYBAS_ID. All spatial CV folds on lev06
+  # so scores stay comparable across the whole ladder (incl. the lev07
+  # basin leaf). To hold out lev07 basins instead, override that leaf's
+  # split with {kind: spatial, fold_dim: basin_lev07}.
+  # =====================================================================
+
+  GEMS_spatial:
+    description: "Like GEMS, but GWA target + spatial CV (lev06)."
+    base_experiment: GEMS
+    output_subdir: results_gems_spatial
+    display_name: "GEMS-GER (spatial)"
+    color: "#43A047"
+    target: {kind: gwa_cm}
+    split:  {kind: spatial, fold_dim: basin_lev06}
+
+  # ---- ERA5 ladder, spatial ----
+  ERA5_0_base_spatial:
+    description: "Like ERA5_0_base, but GWA target + spatial CV (lev06)."
+    base_experiment: ERA5_0_base
+    output_subdir: results_era5_0_base_spatial
+    display_name: "ERA5 Base (spatial)"
+    color: "#90CAF9"
+    target: {kind: gwa_cm}
+    split:  {kind: spatial, fold_dim: basin_lev06}
+
+  ERA5_1_glim_spatial:
+    description: "Like ERA5_1_glim, but GWA target + spatial CV (lev06)."
+    base_experiment: ERA5_1_glim
+    output_subdir: results_era5_1_glim_spatial
+    display_name: "ERA5 +GLiM (spatial)"
+    color: "#64B5F6"
+    target: {kind: gwa_cm}
+    split:  {kind: spatial, fold_dim: basin_lev06}
+
+  ERA5_2_whymap_spatial:
+    description: "Like ERA5_2_whymap, but GWA target + spatial CV (lev06)."
+    base_experiment: ERA5_2_whymap
+    output_subdir: results_era5_2_whymap_spatial
+    display_name: "ERA5 +WHYMAP (spatial)"
+    color: "#42A5F5"
+    target: {kind: gwa_cm}
+    split:  {kind: spatial, fold_dim: basin_lev06}
+
+  ERA5_3_lcc_spatial:
+    description: "Like ERA5_3_lcc, but GWA target + spatial CV (lev06)."
+    base_experiment: ERA5_3_lcc
+    output_subdir: results_era5_3_lcc_spatial
+    display_name: "ERA5 +LCC (spatial)"
+    color: "#2196F3"
+    target: {kind: gwa_cm}
+    split:  {kind: spatial, fold_dim: basin_lev06}
+
+  ERA5_4_twsa_spatial:
+    description: "Like ERA5_4_twsa, but GWA target + spatial CV (lev06)."
+    base_experiment: ERA5_4_twsa
+    output_subdir: results_era5_4_twsa_spatial
+    display_name: "ERA5 +TWSA (spatial)"
+    color: "#1E88E5"
+    target: {kind: gwa_cm}
+    split:  {kind: spatial, fold_dim: basin_lev06}
+
+  ERA5_5_riverdist_spatial:
+    description: "Like ERA5_5_riverdist, but GWA target + spatial CV (lev06)."
+    base_experiment: ERA5_5_riverdist
+    output_subdir: results_era5_5_riverdist_spatial
+    display_name: "ERA5 +RiverDist (spatial)"
+    color: "#1976D2"
+    target: {kind: gwa_cm}
+    split:  {kind: spatial, fold_dim: basin_lev06}
+
+  ERA5_6_basin_lev06_spatial:
+    description: "Like ERA5_6_basin_lev06, but GWA target + spatial CV (lev06). HYBAS_ID already excluded."
+    base_experiment: ERA5_6_basin_lev06
+    output_subdir: results_era5_6_basin_lev06_spatial
+    display_name: "ERA5 +Basin06 (spatial)"
+    color: "#1565C0"
+    target: {kind: gwa_cm}
+    split:  {kind: spatial, fold_dim: basin_lev06}
+
+  ERA5_6_basin_lev07_spatial:
+    description: "Like ERA5_6_basin_lev07, but GWA target + spatial CV (lev06). HYBAS_ID already excluded."
+    base_experiment: ERA5_6_basin_lev07
+    output_subdir: results_era5_6_basin_lev07_spatial
+    display_name: "ERA5 +Basin07 (spatial)"
+    color: "#0D47A1"
+    target: {kind: gwa_cm}
+    split:  {kind: spatial, fold_dim: basin_lev06}
+
+  # ---- Terra ladder, spatial ----
+  Terra_0_base_spatial:
+    description: "Like Terra_0_base, but GWA target + spatial CV (lev06)."
+    base_experiment: Terra_0_base
+    output_subdir: results_terra_0_base_spatial
+    display_name: "Terra Base (spatial)"
+    color: "#CE93D8"
+    target: {kind: gwa_cm}
+    split:  {kind: spatial, fold_dim: basin_lev06}
+
+  Terra_1_glim_spatial:
+    description: "Like Terra_1_glim, but GWA target + spatial CV (lev06)."
+    base_experiment: Terra_1_glim
+    output_subdir: results_terra_1_glim_spatial
+    display_name: "Terra +GLiM (spatial)"
+    color: "#BA68C8"
+    target: {kind: gwa_cm}
+    split:  {kind: spatial, fold_dim: basin_lev06}
+
+  Terra_2_whymap_spatial:
+    description: "Like Terra_2_whymap, but GWA target + spatial CV (lev06)."
+    base_experiment: Terra_2_whymap
+    output_subdir: results_terra_2_whymap_spatial
+    display_name: "Terra +WHYMAP (spatial)"
+    color: "#AB47BC"
+    target: {kind: gwa_cm}
+    split:  {kind: spatial, fold_dim: basin_lev06}
+
+  Terra_3_lcc_spatial:
+    description: "Like Terra_3_lcc, but GWA target + spatial CV (lev06)."
+    base_experiment: Terra_3_lcc
+    output_subdir: results_terra_3_lcc_spatial
+    display_name: "Terra +LCC (spatial)"
+    color: "#9C27B0"
+    target: {kind: gwa_cm}
+    split:  {kind: spatial, fold_dim: basin_lev06}
+
+  Terra_4_twsa_spatial:
+    description: "Like Terra_4_twsa, but GWA target + spatial CV (lev06)."
+    base_experiment: Terra_4_twsa
+    output_subdir: results_terra_4_twsa_spatial
+    display_name: "Terra +TWSA (spatial)"
+    color: "#8E24AA"
+    target: {kind: gwa_cm}
+    split:  {kind: spatial, fold_dim: basin_lev06}
+
+  Terra_5_riverdist_spatial:
+    description: "Like Terra_5_riverdist, but GWA target + spatial CV (lev06)."
+    base_experiment: Terra_5_riverdist
+    output_subdir: results_terra_5_riverdist_spatial
+    display_name: "Terra +RiverDist (spatial)"
+    color: "#7B1FA2"
+    target: {kind: gwa_cm}
+    split:  {kind: spatial, fold_dim: basin_lev06}
+
+  Terra_6_basin_lev06_spatial:
+    description: "Like Terra_6_basin_lev06, but GWA target + spatial CV (lev06). HYBAS_ID already excluded."
+    base_experiment: Terra_6_basin_lev06
+    output_subdir: results_terra_6_basin_lev06_spatial
+    display_name: "Terra +Basin06 (spatial)"
+    color: "#6A1B9A"
+    target: {kind: gwa_cm}
+    split:  {kind: spatial, fold_dim: basin_lev06}
+
+  Terra_6_basin_lev07_spatial:
+    description: "Like Terra_6_basin_lev07, but GWA target + spatial CV (lev06). HYBAS_ID already excluded."
+    base_experiment: Terra_6_basin_lev07
+    output_subdir: results_terra_6_basin_lev07_spatial
+    display_name: "Terra +Basin07 (spatial)"
+    color: "#4A148C"
+    target: {kind: gwa_cm}
+    split:  {kind: spatial, fold_dim: basin_lev06}
